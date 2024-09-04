@@ -1,0 +1,433 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        clifford: '#da373d',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+        }
+
+        .link {
+            @apply w-1/4 rounded transition duration-150 ease-in font-medium text-sm text-center py-3 max-lg:w-1/3 bg-blue-100 text-sky-500  border-4 border-white hover:bg-blue-200 hover:text-blue-500;
+        }
+        
+        .link.active {
+            @apply bg-blue-500 text-white;
+        }
+
+        .ques {
+            @apply font-medium text-slate-900 text-left px-6;
+        }
+
+        .ans {
+            @apply w-full border-t border-slate-100 text-slate-600 py-4 pl-6 pr-3 flex items-center justify-between hover:bg-slate-100 transition duration-150 font-semibold border;
+        }
+
+        .ans.selected {
+            @apply bg-blue-100 text-blue-500;
+        }
+
+        .ans.correct {
+            @apply bg-green-100 text-green-500;
+        }
+
+        .ans.info {
+            @apply bg-blue-100 text-slate-500;
+        }
+
+        .fill-input {
+            @apply w-36 h-6 rounded-sm my-2 border-sky-300;
+        }
+
+        .drag-select {
+            @apply rounded-md border-none my-1 border-sky-300 h-8 text-xs pl-2 pr-6 py-1.5 font-semibold;
+        }
+
+        .youtube-link {
+            @apply rounded transition duration-150 ease-in font-medium text-sm text-center p-3 bg-blue-100 text-sky-500 hover:bg-blue-200 hover:text-blue-500;
+        }
+
+        .fillDragAns {
+            @apply italic font-semibold text-sm text-green-700 mr-4;
+        }
+
+        .fillDragAns.incorrect {
+            @apply text-red-800;
+        }
+
+        .title {
+            @apply m-4 bg-blue-500 text-slate-50 p-2 rounded-md w-fit;
+        }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-700">
+    <div class="container mx-auto">
+        <div class="max-lg:m-2">
+            <div class="bg-white relative shadow rounded-lg w-2/3 max-lg:w-full mx-auto">
+
+                <div class="mt-10 py-4">
+                    <h1 class="font-bold text-center text-3xl text-slate-900">Hệ điều hành</h1>
+                    <p class="text-center text-sm text-slate-400 font-medium">Ôn tập elearning</p>
+                    <div class="flex justify-center items-center my-5 px-6 flex-wrap border-b-2">
+                        <a href="javascript:start(1)" class="link active">Chương 1</a>
+                        <a href="javascript:start(2)" class="link py-3">Chương 2</a>
+                        <a href="javascript:start(3)" class="link py-3">Chương 3</a>
+                        <a href="javascript:start(4)" class="link py-3">Chương 4</a>
+                        <a href="javascript:start(5)" class="link py-3">Chương 5</a>
+                        <a href="javascript:start(6)" class="link py-3">Chương 6</a>
+                        <a href="javascript:start(7)" class="link py-3">Chương 7</a>
+                        <a href="javascript:start(8)" class="link py-3">Chương 8</a>
+                    </div>
+
+                    <div class="wrap-list"></div>
+
+                    <div class="flex justify-center items-center my-5 px-6 flex-wrap border-b-2">
+                        <a href="javascript:start(1)" class="link active">Chương 1</a>
+                        <a href="javascript:start(2)" class="link py-3">Chương 2</a>
+                        <a href="javascript:start(3)" class="link py-3">Chương 3</a>
+                        <a href="javascript:start(4)" class="link py-3">Chương 4</a>
+                        <a href="javascript:start(5)" class="link py-3">Chương 5</a>
+                        <a href="javascript:start(6)" class="link py-3">Chương 6</a>
+                        <a href="javascript:start(7)" class="link py-3">Chương 7</a>
+                        <a href="javascript:start(8)" class="link py-3">Chương 8</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        const jsonFile = "hdh.json";
+        const chapter = 1;
+        const wrapList = document.querySelector('.wrap-list');
+
+        function chooseAns(element) {
+            
+            const parent = element.closest('.w-full');
+            const ans = parent.querySelectorAll('.ans');
+            const correct = element.getAttribute('data-correct');
+            const span = element.querySelector('span');
+
+            ans.forEach(item => item.classList.remove('selected')); //, 'correct'
+
+            element.classList.add('selected');
+
+            if (correct == 'true') {
+                element.classList.add('correct');
+                span.innerHTML = 'Đáp án đúng';
+            }
+
+            if (correct == 'false') {
+                element.classList.add('selected');
+                span.innerHTML = 'Chưa đúng';
+            }
+            
+        }
+
+        function inputAns(element, id) {
+            const ans = element.getAttribute('data-value');
+            const ansElement = document.querySelector(`span#${id}`);
+            const correct = element.value;
+
+            const hint = ans.split(':');
+
+            let hintText = '';
+            if(hint.length > 1) hintText = ` - Gợi ý: ${hint[1]}`;
+
+            const corrects = hint[0].split('/');
+            let ansCorrect = false;
+            corrects.forEach(item => {
+                if (item == correct) ansCorrect = true;
+            });
+
+            if (ansCorrect) {
+                element.classList.remove('incorrect');
+                ansElement.innerHTML = 'Đáp án đúng';
+            } else {
+                element.classList.add('incorrect');
+                ansElement.innerHTML = `Chưa đúng${hintText}`;
+            }
+
+        }
+
+        function dragAns(element, id) {
+            
+            const ans = element.getAttribute('data-value');
+            const parent = element.closest('.w-full');
+            const ansElement = document.querySelector(`span#${id}`);
+            const correct = element.value;
+            console.log(id, ansElement);
+
+            const hint = ans.split(':');
+
+            let hintText = '';
+            if(hint.length > 1) hintText = ` - Gợi ý: ${hint[1]}`;
+
+            const corrects = hint[0].split('/');
+            let ansCorrect = false;
+            corrects.forEach(item => {
+                if (item == correct) ansCorrect = true;
+            });
+
+            if (ansCorrect) {
+                element.classList.remove('incorrect');
+                ansElement.innerHTML = 'Đáp án đúng';
+            } else {
+                element.classList.add('incorrect');
+                ansElement.innerHTML = `Chưa đúng${hintText}`;
+            }
+
+        }
+
+        function loadQues(data) { // all data
+            data.forEach(item => { // each chapter
+                let html = /*html*/`
+                    <div class="wrap-item">
+                        <div class="title">
+                            ${item.title}
+                        </div>
+                `
+                let quesHtml = ``;
+
+                item.metaData.forEach((ques, i) => { // each question
+                    ques = ques.data;
+                    const type = ques.type;
+
+                    switch(type) {
+                        case 'Multiple Choice': {
+                            quesHtml += /*html*/`
+                                <div class="w-full border-b-2 mb-4">
+                                    <h3 class="ques">
+                                        <span class="uppercase text-sky-700">Câu ${i + 1}:</span>
+                                        <div class="">
+                                            ${ques.question}
+                                        </div>
+                                    </h3>
+                                    ${ques.img ? `
+                                        <img src="${ques.img}" class="w-1/2 mx-auto my-3" alt="image">    
+                                    ` : ``}
+                                    <div class="mt-5 w-full flex flex-col items-center overflow-hidden text-sm pl-4 pb-4">
+                                        ${ques.answers.map((ans, j) => {
+                                            return /*html*/`
+                                                <a href="javascript:void(0)" onclick="chooseAns(this)" class="ans" data-correct="${ans.correct}">
+                                                    ${ans.text} 
+                                                    <span class="font-semibold italic"></span>
+                                                </a>
+                                            `
+                                        }).join('')}
+                                    </div>
+                                    ${ques.video ? /*html*/`
+                                        <ul class="mb-3 pl-4 pb-4">
+                                            <li><a class="youtube-link" href="${ques.video}" target="_blank">${ques.video}</a></li>
+                                        </ul>
+                                    ` : ``}
+                                </div>
+                            `
+                        };break;
+                        case 'True/False Question': {
+                            quesHtml += /*html*/`
+                                <div class="w-full border-b-2 mb-4">
+                                    <h3 class="ques">
+                                        <span class="uppercase text-sky-700">Câu ${i + 1}:</span>
+                                        ${ques.question}
+                                    </h3>
+                                    ${ques.img ? `
+                                        <img src="${ques.img}" class="w-1/2 mx-auto my-3" alt="image">    
+                                    ` : ``}
+                                    <div class="mt-5 w-full flex flex-col items-center overflow-hidden text-sm pl-4 pb-4">
+                                        <a href="javascript:void(0)" onclick="chooseAns(this)" class="ans" data-correct="${ques.correct == 'true' ? 'true' : 'false'}">
+                                            Đúng (True) <span class="font-semibold italic"></span>
+                                        </a>
+            
+                                        <a href="javascript:void(0)" onclick="chooseAns(this)" class="ans" data-correct="${ques.correct == 'false' ? 'true' : 'false'}">
+                                            Sai (False) <span class="font-semibold italic"></span>
+                                        </a>
+                                    </div>
+                                    ${ques.video ? /*html*/`
+                                        <ul class="mb-3 pl-4 pb-4">
+                                            <li><a class="youtube-link" href="${ques.video}" target="_blank">${ques.video}</a></li>
+                                        </ul>
+                                    ` : ``}
+                                </div>
+                            `
+                        };break;
+                        case 'Fill in the Blanks': {
+                            quesHtml += /*html*/ `
+                                <div class="w-full border-b-2 mb-4">
+                                    <h3 class="ques">
+                                        <span class="uppercase text-sky-700">Câu ${i + 1}:</span>
+                                        ${ques.text}
+                                    </h3>
+                                    ${ques.img ? `
+                                        <img src="${ques.img}" class="w-1/2 mx-auto my-3" alt="image">    
+                                    ` : ``}
+                                    <div class="my-5 w-full flex flex-col items-center overflow-hidden text-sm pl-4 pb-4">
+                                        <div class="ans info flex-col text-base">
+                                            <div>
+                                                ${replaceTextBetweenStars('<input data-value="" type="text" oninput="inputAns(this, \'randId\')" class="fill-input"> <span id="randId" class="fillDragAns"></span>', ques.questions[0])}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    ${ques.video ? /*html*/`
+                                        <ul class="mb-3 pl-4 pb-4">
+                                            <li><a class="youtube-link" href="${ques.video}" target="_blank">${ques.video}</a></li>
+                                        </ul>
+                                    ` : ``}
+                                </div>
+                            `
+                        };break;
+                        case 'Drag the Words': {
+                            quesHtml += /*html*/ `
+                                <div class="w-full border-b-2 mb-4">
+                                    <h3 class="ques">
+                                        <span class="uppercase text-sky-700">Câu ${i + 1}:</span>
+                                        ${ques.taskDescription.replace('kéo thả', 'chọn')}
+                                    </h3>
+                                    ${ques.img ? `
+                                        <img src="${ques.img}" class="w-1/2 mx-auto my-3" alt="image">    
+                                    ` : ``}
+                                    <div class="my-5 w-full flex flex-col items-center overflow-hidden text-sm pl-4 pb-4">
+                                        <div class="ans info flex-col text-base">
+                                            <div class="">                                                    
+                                                ${_getTextBetweenStars(ques.textField)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    ${ques.video ? /*html*/`
+                                        <ul class="mb-3 pl-4 pb-4">
+                                            <li><a class="youtube-link" href="${ques.video}" target="_blank">${ques.video}</a></li>
+                                        </ul>
+                                    ` : ``}
+                                </div>
+                            `
+                        };break;
+                    }
+                });
+
+                html += /*html*/`
+                        ${quesHtml}
+                    </div>
+                `;
+
+                wrapList.innerHTML += html;
+            });
+        }
+
+        function replaceTextBetweenStars(input, htmlString) {
+            // Create a regular expression to match text between *
+            const regex = /\*([^*]+)\*/g;
+
+            const search = htmlString.match(regex);
+            let preData = '';
+            let idRandom = 'randId';
+
+            search.forEach(item => {
+                const newidRandom = 'k' + Math.random().toString(36).substring(7);
+                input = input.replace(`data-value="${preData}"`, `data-value="${item.replace(/\*/g, '')}"`);
+                input = input.replace(`${idRandom}`, `${newidRandom}`);
+                input = input.replace(`${idRandom}`, `${newidRandom}`);
+
+                htmlString = htmlString.replace(item, input);
+                idRandom = newidRandom;
+                preData = item.replace(/\*/g, '');
+            });
+
+            return htmlString;
+        }
+
+        function getTextBetweenStars(htmlString) {
+            const regex = /\*([^*]+)\*/g;
+
+            const search = htmlString.match(regex);
+
+            let select = `<select onchange="dragAns(this, 'randId')" data-value="" class="drag-select"><option></option>`;
+
+            search.forEach(item => {
+                select += `<option>${item.replace(/\*/g, '')}</option>`;
+            });
+
+            select += `</select> <span class="fillDragAns" id="randId"></span>`;
+                        
+            return select;
+        }
+
+        function _getTextBetweenStars(htmlString) {
+            const regex = /\*([^*]+)\*/g;
+
+            const search = htmlString.match(regex);
+
+            input = getTextBetweenStars(htmlString);
+
+            let preData = '';
+            let idRandom = 'randId';
+
+            search.forEach(item => {
+                const newidRandom = 'k' + Math.random().toString(36).substring(7);
+
+                input = input.replace(`data-value="${preData}"`, `data-value="${item.replace(/\*/g, '')}"`);
+                input = input.replace(`${idRandom}`, `${newidRandom}`);
+                input = input.replace(`${idRandom}`, `${newidRandom}`);
+
+                htmlString = htmlString.replace(item, input);
+                preData = item.replace(/\*/g, '');
+                idRandom = newidRandom;
+            });
+
+            return htmlString;
+        }
+
+        async function start(chapter = 1) {
+            const response = await fetch(jsonFile);
+            if (!response.ok) throw new Error(`Response status: ${response.status}`);
+
+            const json = await response.json();
+
+            function loadChapter(chapter) {
+                const title = `Chương ${chapter}`;
+
+                let data = json.filter(item => item.title.includes(title));
+
+                wrapList.innerHTML = '';
+
+                const activeLink = document.querySelectorAll('.link.active');
+                if (activeLink) activeLink.forEach(item => item.classList.remove('active'));
+
+                const link = document.querySelectorAll(`.link[href="javascript:start(${chapter})"]`);
+                if (link) link.forEach(item => item.classList.add('active'));                
+                
+                loadQues(data);
+            }
+
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: "smooth",
+            });
+
+            loadChapter(chapter);
+        }
+
+        start(chapter);
+    </script>
+
+</body>
+
+</html>
